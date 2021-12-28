@@ -1,0 +1,168 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/images/icons/favicon-16x16.ico?v=2.6.2" type="image/png" sizes="16x16"><link rel="icon" href="/images/icons/favicon-32x32.ico?v=2.6.2" type="image/png" sizes="32x32"><meta name="description" content="强烈推荐使用系统源安装ffmpeg，例如： sudo apt install ffmpeg for Ubuntu。当不能满足需求的时候再手动编译吧。  有些Linux发行版可以在线安装ffmpeg，但是因为版权关系不能包含我们所需的编码器，有时候还是需要手动编译。下面介绍一些常见编码器的安装。libx264、libx265、libfdk-aac、libmp3lame、libvpx、libopus">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux系统编译FFmpeg">
+<meta property="og:url" content="https://blog.lmshao.cn/how-to-build-ffmpeg.html">
+<meta property="og:site_name" content="SHAO Liming&#39;s Free Space">
+<meta property="og:description" content="强烈推荐使用系统源安装ffmpeg，例如： sudo apt install ffmpeg for Ubuntu。当不能满足需求的时候再手动编译吧。  有些Linux发行版可以在线安装ffmpeg，但是因为版权关系不能包含我们所需的编码器，有时候还是需要手动编译。下面介绍一些常见编码器的安装。libx264、libx265、libfdk-aac、libmp3lame、libvpx、libopus">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-12-24T06:38:32.000Z">
+<meta property="article:modified_time" content="2021-12-27T06:02:58.000Z">
+<meta property="article:author" content="SHAO Liming">
+<meta property="article:tag" content="ffmpeg">
+<meta name="twitter:card" content="summary"><title>Linux系统编译FFmpeg | SHAO Liming's Free Space</title><link ref="canonical" href="https://blog.lmshao.cn/how-to-build-ffmpeg.html"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@latest/dist/gitalk.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.6.2"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  assistSearch: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: {"enable":true,"showOnPost":false,"scrollDownIcon":false},
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"default","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: undefined,
+  lazyload: false,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 5.4.0"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-users"></i></span><span class="header-nav-menu-item__text">友链</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" target="_blank" rel="noopener" href="https://github.com/lmshao"><span class="header-nav-submenu-item__icon"><i class="fab fa-github"></i></span><span class="header-nav-submenu-item__text">Github</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" target="_blank" rel="noopener" href="https://blog.csdn.net/shaosunrise"><span class="header-nav-submenu-item__icon"><i class="fab fa-cuttlefish"></i></span><span class="header-nav-submenu-item__text">CSDN</span></a></div></div></div></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">Linux系统编译FFmpeg</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2021-12-24</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2021-12-27</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">8分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body"><blockquote>
+<p>强烈推荐使用系统源安装ffmpeg，例如： <code>sudo apt install ffmpeg</code> for Ubuntu。<br>当不能满足需求的时候再手动编译吧。</p>
+</blockquote>
+<p>有些Linux发行版可以在线安装ffmpeg，但是因为版权关系不能包含我们所需的编码器，有时候还是需要手动编译。<br>下面介绍一些常见编码器的安装。<strong>libx264</strong>、<strong>libx265</strong>、<strong>libfdk-aac</strong>、<strong>libmp3lame</strong>、<strong>libvpx</strong>、<strong>libopus</strong>、<strong>libaom for AV1</strong>。不需要的可以不安装，最终ffmpeg configure不指定特定的编码器就可以了。</p>
+<span id="more"></span>
+<p>对版本没要求的，可以使用发行版对应的应用仓库的命令进行安装。<br>不想自己编译的可以直接下载我编译好的，GNU C Library (GNU libc) 版本大于等于2.17的系统都可以使用。常见的CentOS 7和Ubuntu13.04以上都应该都可以。<br><span class="exturl"><a class="exturl__link"   target="_blank" rel="noopener" href="https://github.com/lmshao/FFmpegBinary/releases" >https://github.com/lmshao/FFmpegBinary/releases</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+
+        <h1 id="编译第三方库"   >
+          <a href="#编译第三方库" class="heading-link"><i class="fas fa-link"></i></a><a href="#编译第三方库" class="headerlink" title="编译第三方库"></a>编译第三方库</h1>
+      
+        <h2 id="nasm"   >
+          <a href="#nasm" class="heading-link"><i class="fas fa-link"></i></a><a href="#nasm" class="headerlink" title="nasm"></a>nasm</h2>
+      <p>nasm是汇编编译器，有些编码器包含汇编代码，需要使用nasm。有些系统命令安装的nasm版本比较低，比如centos7 yum版本2.10。可以选择手动编译安装2.15版本。</p>
+<figure class="highlight sh"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">wget https://www.nasm.us/pub/nasm/releasebuilds/2.15.05/nasm-2.15.05.tar.xz</span><br><span class="line">tar Jxvf nasm-2.15.05.tar.xz</span><br><span class="line"><span class="built_in">pushd</span> nasm-2.15.05</span><br><span class="line"></span><br><span class="line">./configure</span><br><span class="line">make &amp;&amp; make install</span><br><span class="line"></span><br><span class="line"><span class="built_in">popd</span></span><br></pre></td></tr></table></div></figure>
+
+
+        <h2 id="libx264"   >
+          <a href="#libx264" class="heading-link"><i class="fas fa-link"></i></a><a href="#libx264" class="headerlink" title="libx264"></a>libx264</h2>
+      <p>libx264是市面上评价比较高的H.264编码器，很多高清电影都是使用x264压缩的。</p>
+<figure class="highlight sh"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">wget https://code.videolan.org/videolan/x264/-/archive/master/x264-master.tar.bz2</span><br><span class="line">tar jxvf x264-master.tar.bz2</span><br><span class="line"><span class="built_in">pushd</span> x264-master</span><br><span class="line"></span><br><span class="line">./configure --enable-shared</span><br><span class="line">make &amp;&amp; make install</span><br><span class="line"></span><br><span class="line"><span class="built_in">popd</span></span><br></pre></td></tr></table></div></figure>
+
+<p>Ubuntu系统在线安装</p>
+<figure class="highlight plaintext"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install libx264-dev</span><br></pre></td></tr></table></div></figure>
+
+
+        <h2 id="libx265"   >
+          <a href="#libx265" class="heading-link"><i class="fas fa-link"></i></a><a href="#libx265" class="headerlink" title="libx265"></a>libx265</h2>
+      <p>hg类似于git，好多系统可以在线安装这个命令。<code>apt install mercurial</code> / <code>yum install mercurial</code>。<br>默认8bit编码模式，可以在配置时把 HIGH_BIT_DEPTH=ON 选择10bit。</p>
+<figure class="highlight sh"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">hg <span class="built_in">clone</span> http://hg.videolan.org/x265</span><br><span class="line"><span class="built_in">pushd</span> x265/build/linux/</span><br><span class="line">cmake ../../<span class="built_in">source</span> -DHIGH_BIT_DEPTH=ON</span><br><span class="line">make &amp;&amp; make install</span><br><span class="line"></span><br><span class="line"><span class="built_in">popd</span></span><br></pre></td></tr></table></div></figure>
+
+<p>Ubuntu系统在线安装</p>
+<figure class="highlight plaintext"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install libx265-dev</span><br></pre></td></tr></table></div></figure>
+
+
+        <h2 id="libfdk-aac"   >
+          <a href="#libfdk-aac" class="heading-link"><i class="fas fa-link"></i></a><a href="#libfdk-aac" class="headerlink" title="libfdk-aac"></a>libfdk-aac</h2>
+      <p>libfdk-aac是目前评价最高的开源aac编码器。Ubuntu仓库没有这个，必须手动编译安装。</p>
+<figure class="highlight sh"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">wget -O fdk-aac-2.0.1.tar.gz https://sourceforge.net/projects/opencore-amr/files/fdk-aac/fdk-aac-2.0.1.tar.gz/download</span><br><span class="line">tar zxvf fdk-aac-2.0.1.tar.gz</span><br><span class="line"><span class="built_in">pushd</span> fdk-aac-2.0.1</span><br><span class="line"></span><br><span class="line">./configure</span><br><span class="line">make &amp;&amp; make install</span><br><span class="line"></span><br><span class="line"><span class="built_in">popd</span></span><br></pre></td></tr></table></div></figure>
+
+
+        <h2 id="libmp3lame"   >
+          <a href="#libmp3lame" class="heading-link"><i class="fas fa-link"></i></a><a href="#libmp3lame" class="headerlink" title="libmp3lame"></a>libmp3lame</h2>
+      <p>libmp3lame 是mp3编码器。</p>
+<figure class="highlight sh"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">wget -O lame-3.100.tar.gz https://sourceforge.net/projects/lame/files/lame/3.100/lame-3.100.tar.gz/download</span><br><span class="line">tar zxvf lame-3.100.tar.gz</span><br><span class="line"><span class="built_in">pushd</span> lame-3.100</span><br><span class="line"></span><br><span class="line">./configure</span><br><span class="line">make &amp;&amp; make install</span><br><span class="line"></span><br><span class="line"><span class="built_in">popd</span></span><br></pre></td></tr></table></div></figure>
+
+<p>Ubuntu系统在线安装</p>
+<figure class="highlight plaintext"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt install libmp3lame-dev</span><br></pre></td></tr></table></div></figure>
+
+
+        <h2 id="libvpx"   >
+          <a href="#libvpx" class="heading-link"><i class="fas fa-link"></i></a><a href="#libvpx" class="headerlink" title="libvpx"></a>libvpx</h2>
+      <p>libvpx 是开源视频编码格式 VP8/VP9 的编码器。</p>
+<figure class="highlight sh"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">wget https://github.com/webmproject/libvpx/archive/v1.10.0/libvpx-1.10.0.tar.gz</span><br><span class="line">tar zxvf libvpx-1.10.0.tar.gz </span><br><span class="line"><span class="built_in">pushd</span> libvpx-1.10.0</span><br><span class="line"></span><br><span class="line">mkdir libvpx-build &amp;&amp; <span class="built_in">cd</span> libvpx-build</span><br><span class="line">../configure --enable-shared --disable-static</span><br><span class="line">make &amp;&amp; make install</span><br><span class="line"></span><br><span class="line"><span class="built_in">popd</span></span><br></pre></td></tr></table></div></figure>
+
+<p>Ubuntu系统在线安装</p>
+<figure class="highlight plaintext"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt install libopus-dev</span><br></pre></td></tr></table></div></figure>
+
+
+        <h2 id="libopus"   >
+          <a href="#libopus" class="heading-link"><i class="fas fa-link"></i></a><a href="#libopus" class="headerlink" title="libopus"></a>libopus</h2>
+      <p>libopus 是编码opus格式用的。</p>
+<figure class="highlight sh"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">wget https://archive.mozilla.org/pub/opus/opus-1.3.1.tar.gz</span><br><span class="line">tar zxvf opus-1.3.1.tar.gz</span><br><span class="line"><span class="built_in">pushd</span> opus-1.3.1</span><br><span class="line"></span><br><span class="line">./configure --enable-shared --disable-static</span><br><span class="line">make &amp;&amp; make install</span><br><span class="line"></span><br><span class="line"><span class="built_in">popd</span></span><br></pre></td></tr></table></div></figure>
+
+<p>Ubuntu系统在线安装</p>
+<figure class="highlight plaintext"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt install libopus-dev</span><br></pre></td></tr></table></div></figure>
+
+
+        <h2 id="libaom"   >
+          <a href="#libaom" class="heading-link"><i class="fas fa-link"></i></a><a href="#libaom" class="headerlink" title="libaom"></a>libaom</h2>
+      <p>新出的 AV1 视频编码器</p>
+<figure class="highlight sh"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://aomedia.googlesource.com/aom</span><br><span class="line">git checkout v3.2.0 -b v3.2.0 <span class="comment">#可指定版本</span></span><br><span class="line">mkdir build &amp;&amp; <span class="built_in">pushd</span> build</span><br><span class="line">cmake .. -DBUILD_SHARED_LIBS=1</span><br><span class="line">make &amp;&amp; make install</span><br></pre></td></tr></table></div></figure>
+
+
+        <h2 id="Intel-Media-SDK-Intel-硬件加速-qsv"   >
+          <a href="#Intel-Media-SDK-Intel-硬件加速-qsv" class="heading-link"><i class="fas fa-link"></i></a><a href="#Intel-Media-SDK-Intel-硬件加速-qsv" class="headerlink" title="Intel  Media SDK - Intel 硬件加速 qsv"></a>Intel  Media SDK - Intel 硬件加速 qsv</h2>
+      <p>下载<code> Intel-Media-SDK</code>，<span class="exturl"><a class="exturl__link"   target="_blank" rel="noopener" href="https://github.com/Intel-Media-SDK/MediaSDK/releases" >https://github.com/Intel-Media-SDK/MediaSDK/releases
+</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span>，运行<code>install_media.sh</code> 默认安装在<code>/opt/</code>目录下了。</p>
+<figure class="highlight plaintext"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/opt/intel/mediasdk/lib64/pkgconfig</span><br></pre></td></tr></table></div></figure>
+<p>ffmepg 配置参数</p>
+<figure class="highlight plaintext"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--enable-libmfx</span><br></pre></td></tr></table></div></figure>
+
+
+        <h1 id="编译FFmpeg"   >
+          <a href="#编译FFmpeg" class="heading-link"><i class="fas fa-link"></i></a><a href="#编译FFmpeg" class="headerlink" title="编译FFmpeg"></a>编译FFmpeg</h1>
+      <p>需要的编码器按照上述的文档安装完后，在配置ffmpeg的时候使用特定的参数指定就可以集成进去了。</p>
+<figure class="highlight sh"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">wget https://www.ffmpeg.org/releases/ffmpeg-4.4.tar.bz2</span><br><span class="line">tar jxvf ffmpeg-4.4.tar.bz2</span><br><span class="line"><span class="built_in">pushd</span> ffmpeg-4.4</span><br><span class="line"></span><br><span class="line"><span class="built_in">export</span> PKG_CONFIG_PATH=/usr/<span class="built_in">local</span>/lib/pkgconfig/:<span class="variable">$PKG_CONFIG_PATH</span></span><br><span class="line">./configure --enable-shared --disable-static --enable-gpl --enable-nonfree \</span><br><span class="line">	--enable-libx264 \</span><br><span class="line">	--enable-libx265 \</span><br><span class="line">	--enable-libfdk-aac \</span><br><span class="line">	--enable-libmp3lame \</span><br><span class="line">	--enable-libvpx \</span><br><span class="line">	--enable-libopus \</span><br><span class="line">	--enable-libaom</span><br><span class="line"></span><br><span class="line">make &amp;&amp; make install</span><br><span class="line"></span><br><span class="line"><span class="built_in">popd</span></span><br></pre></td></tr></table></div></figure>
+<p>make install 后 ffmpeg 命令和相应的动态库就安装到系统目录了，默认一般是<code>/usr/local/bin/</code>和 <code>/usr/local/lib/</code>目录，可以使用<code>./configure --prefix=./xxxxx</code>来指定安装目录。</p>
+
+        <h2 id="编译-ffplay"   >
+          <a href="#编译-ffplay" class="heading-link"><i class="fas fa-link"></i></a><a href="#编译-ffplay" class="headerlink" title="编译 ffplay"></a>编译 ffplay</h2>
+      <p>默认编译可能没有编译出来ffplay，可以通过以下方法编译ffplay。</p>
+<p>安装SDL2</p>
+<figure class="highlight sh"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install libsdl2-dev  <span class="comment"># Ubuntu</span></span><br></pre></td></tr></table></div></figure>
+<p>configure 参数</p>
+<figure class="highlight plaintext"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--enable-ffplay</span><br></pre></td></tr></table></div></figure>
+
+<hr>
+<p>不想动手的，可以下载这个<span class="exturl"><a class="exturl__link"   target="_blank" rel="noopener" href="https://github.com/lmshao/FFmpegBinary/releases/tag/v2012.13.03" >FFmpeg 4.4.1 Binary</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span>。</p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="https://blog.lmshao.cn">SHAO Liming</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="https://blog.lmshao.cn/how-to-build-ffmpeg.html">https://blog.lmshao.cn/how-to-build-ffmpeg.html</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="https://blog.lmshao.cn/tags/ffmpeg/">ffmpeg</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/images/alipay.webp"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/images/wepay.webp"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-next"><a class="paginator-next__link" href="/hello-world.html"><span class="paginator-prev__text">Hello World</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="gitalk-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%BC%96%E8%AF%91%E7%AC%AC%E4%B8%89%E6%96%B9%E5%BA%93"><span class="toc-number">1.</span> <span class="toc-text">
+          编译第三方库</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#nasm"><span class="toc-number">1.1.</span> <span class="toc-text">
+          nasm</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#libx264"><span class="toc-number">1.2.</span> <span class="toc-text">
+          libx264</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#libx265"><span class="toc-number">1.3.</span> <span class="toc-text">
+          libx265</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#libfdk-aac"><span class="toc-number">1.4.</span> <span class="toc-text">
+          libfdk-aac</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#libmp3lame"><span class="toc-number">1.5.</span> <span class="toc-text">
+          libmp3lame</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#libvpx"><span class="toc-number">1.6.</span> <span class="toc-text">
+          libvpx</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#libopus"><span class="toc-number">1.7.</span> <span class="toc-text">
+          libopus</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#libaom"><span class="toc-number">1.8.</span> <span class="toc-text">
+          libaom</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Intel-Media-SDK-Intel-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E9%80%9F-qsv"><span class="toc-number">1.9.</span> <span class="toc-text">
+          Intel  Media SDK - Intel 硬件加速 qsv</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%BC%96%E8%AF%91FFmpeg"><span class="toc-number">2.</span> <span class="toc-text">
+          编译FFmpeg</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BC%96%E8%AF%91-ffplay"><span class="toc-number">2.1.</span> <span class="toc-text">
+          编译 ffplay</span></a></li></ol></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/images/avatar.jpg" alt="avatar"></div><p class="sidebar-ov-author__text">Stay Hungry Stay Foolish</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lmshao" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://blog.csdn.net/shaosunrise" target="_blank" rel="noopener" data-popover="CSDN" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-cuttlefish"></i></span></a><a class="sidebar-ov-social-item" href="mailto:lmshao@163.com" target="_blank" rel="noopener" data-popover="Email" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="far fa-envelope"></i></span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">2</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">2</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">1</div><div class="sidebar-ov-state-item__name">标签</div></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span><span class="sidebar-reading-info__perc">%</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2021~2022</span><span class="footer__icon"><i class="fas fa-smile-wink"></i></span><span>SHAO Liming.  All Rights Reserved</span></div><div><span>Powered by <a href="http://hexo.io/" title="Hexo" target="_blank" rel="noopener">Hexo</a></span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/ribbon.js@latest/dist/ribbon.min.js" size="120" alpha="0.6" zIndex="-1"></script><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/gitalk@latest/dist/gitalk.min.js"></script><script src="https://cdn.jsdelivr.net/npm/js-md5@latest/src/md5.min.js"></script><script>function loadGitalk () {
+  if (!document.getElementById('gitalk-container')) {
+    return;
+  }
+
+  var gitalk = new Gitalk({
+    id: md5(window.location.pathname.slice(1)),
+    clientID: 'cbc4948c355e64c0c5f4',
+    clientSecret: '0e1e938252a4d1bfbb5b51a40757b497bcb37367',
+    repo: 'lmshao.github.io',
+    owner: 'lmshao',
+    admin: ['lmshao'],
+    distractionFreeMode: 'false',
+    language: 'zh-CN'
+  });
+  gitalk.render('gitalk-container');
+}
+
+if (false) {
+  loadGitalk();
+} else {
+  window.addEventListener('DOMContentLoaded', loadGitalk, false);
+}</script><script src="/js/utils.js?v=2.6.2"></script><script src="/js/stun-boot.js?v=2.6.2"></script><script src="/js/scroll.js?v=2.6.2"></script><script src="/js/header.js?v=2.6.2"></script><script src="/js/sidebar.js?v=2.6.2"></script></body></html>
