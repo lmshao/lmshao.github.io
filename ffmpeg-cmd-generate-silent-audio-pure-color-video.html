@@ -1,0 +1,474 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/images/icons/favicon-16x16.ico?v=2.6.2" type="image/png" sizes="16x16"><link rel="icon" href="/images/icons/favicon-32x32.ico?v=2.6.2" type="image/png" sizes="32x32"><meta name="description" content="开发中有时需要生成静音音频或者纯色黑屏视频为便于测试或其他特殊应用场景，可以使用FFmpeg命令-f lavfi来搞定。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="FFmpeg生成静音音频和黑屏视频命令">
+<meta property="og:url" content="https://blog.lmshao.com/ffmpeg-cmd-generate-silent-audio-pure-color-video.html">
+<meta property="og:site_name" content="SHAO Liming&#39;s Free Space">
+<meta property="og:description" content="开发中有时需要生成静音音频或者纯色黑屏视频为便于测试或其他特殊应用场景，可以使用FFmpeg命令-f lavfi来搞定。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-01-06T05:24:11.000Z">
+<meta property="article:modified_time" content="2022-01-06T08:48:05.844Z">
+<meta property="article:author" content="SHAO Liming">
+<meta property="article:tag" content="ffmpeg">
+<meta name="twitter:card" content="summary"><title>FFmpeg生成静音音频和黑屏视频命令 | SHAO Liming's Free Space</title><link ref="canonical" href="https://blog.lmshao.com/ffmpeg-cmd-generate-silent-audio-pure-color-video.html"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@latest/dist/gitalk.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.6.2"><link rel="dns-prefetch" href="https://hm.baidu.com"><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement('script');
+  hm.src = 'https://hm.baidu.com/hm.js?2ebfe385bf2dbc87f6eef75c7099d59b';
+  hm.async = true;
+
+  if (false) {
+    hm.setAttribute('data-pjax', '');
+  }
+  var s = document.getElementsByTagName('script')[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();</script><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  assistSearch: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: {"enable":true,"showOnPost":false,"scrollDownIcon":false},
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"default","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: undefined,
+  lazyload: false,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 5.4.0">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-users"></i></span><span class="header-nav-menu-item__text">友链</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" target="_blank" rel="noopener" href="https://github.com/lmshao"><span class="header-nav-submenu-item__icon"><i class="fab fa-github"></i></span><span class="header-nav-submenu-item__text">Github</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" target="_blank" rel="noopener" href="https://blog.csdn.net/shaosunrise"><span class="header-nav-submenu-item__icon"><i class="fab fa-cuttlefish"></i></span><span class="header-nav-submenu-item__text">CSDN</span></a></div></div></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">FFmpeg生成静音音频和黑屏视频命令</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2022-01-06</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2022-01-06</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">6分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body"><p>开发中有时需要生成静音音频或者纯色黑屏视频为便于测试或其他特殊应用场景，可以使用FFmpeg命令<code>-f lavfi</code>来搞定。</p>
+<span id="more"></span>
+
+
+        <h2 id="生成静音音频">
+          <a href="#生成静音音频" class="heading-link"><i class="fas fa-link"></i></a><a href="#生成静音音频" class="headerlink" title="生成静音音频"></a>生成静音音频</h2>
+      <p>可以使用<code>anullsrc</code>或者<code>aevalsrc</code>来生成静音音频，<code>aevalsrc</code>还可以生成其他类型声音。</p>
+<p>以下命令生成10s特定采样率和声道的静音音频，可以指定编码器进行编码。</p>
+
+        <h3 id="anullsrc">
+          <a href="#anullsrc" class="heading-link"><i class="fas fa-link"></i></a><a href="#anullsrc" class="headerlink" title="anullsrc"></a>anullsrc</h3>
+      <figure class="highlight sh"><div class="table-container"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ffmpeg -f lavfi -i anullsrc -t 10 silent-audio.mp3</span><br><span class="line"><span class="comment"># or</span></span><br><span class="line">ffplay -f lavfi -i anullsrc=r=44100:cl=stereo -t 10 silent-audio.mp3</span><br></pre></td></tr></tbody></table></div></figure>
+<ul>
+<li><p>sample_rate, r</p>
+<p>  指定采样率，默认44100。</p>
+</li>
+<li><p>channel_layout, cl</p>
+<p>  指定通道布局，详见 <em>libavutil/channel_layout.c</em> 中 <em>channel_layout_map</em> 定义，常见<code>mono</code> <code>stereo</code> <code>5.1</code>。</p>
+</li>
+<li><p>-t</p>
+<p>  文件时长，不指定就一直生成。</p>
+</li>
+</ul>
+
+        <h3 id="aevalsrc">
+          <a href="#aevalsrc" class="heading-link"><i class="fas fa-link"></i></a><a href="#aevalsrc" class="headerlink" title="aevalsrc"></a>aevalsrc</h3>
+      <figure class="highlight sh"><div class="table-container"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ffmpeg -f lavfi -i aevalsrc=0 -t 10 silent-audio.mp3</span><br></pre></td></tr></tbody></table></div></figure>
+
+
+
+        <h2 id="生成纯色视频">
+          <a href="#生成纯色视频" class="heading-link"><i class="fas fa-link"></i></a><a href="#生成纯色视频" class="headerlink" title="生成纯色视频"></a>生成纯色视频</h2>
+      <p>可以使用<code>color</code>或者<code>nullsrc</code>源来生成指定格式的纯色视频。</p>
+
+        <h3 id="color">
+          <a href="#color" class="heading-link"><i class="fas fa-link"></i></a><a href="#color" class="headerlink" title="color"></a>color</h3>
+      <figure class="highlight sh"><div class="table-container"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ffmpeg -f lavfi -i color=size=1920x1080:rate=25:color=black:duration=5 black.mp4</span><br><span class="line"><span class="comment"># or</span></span><br><span class="line">ffmpeg -f lavfi -i color=s=1920x1080:r=25:c=<span class="string">'#FF00FF'</span>:d=5 purple.mp4</span><br></pre></td></tr></tbody></table></div></figure>
+
+<ul>
+<li><p>color,c:</p>
+<p>  视频颜色，可以是颜色名或者数值<code>#RRGGBB</code>,详见<span class="exturl"><a class="exturl__link" target="_blank" rel="noopener" href="https://ffmpeg.org/ffmpeg-utils.html#color-syntax">ffmpeg color</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span>。</p>
+</li>
+</ul>
+
+        <h3 id="nullsrc">
+          <a href="#nullsrc" class="heading-link"><i class="fas fa-link"></i></a><a href="#nullsrc" class="headerlink" title="nullsrc"></a>nullsrc</h3>
+      <figure class="highlight sh"><div class="table-container"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ffmpeg -f lavfi -i nullsrc=size=1280x720:rate=25:duration=5,lutrgb=0:0:0 black.mp4</span><br><span class="line"><span class="comment"># or</span></span><br><span class="line">ffmpeg -f lavfi -i nullsrc=s=1280x720:r=25:d=5,lutrgb=255:0:255 purple.mp4</span><br></pre></td></tr></tbody></table></div></figure>
+
+<ul>
+<li><p>size, s:</p>
+<p>  图像分辨率</p>
+</li>
+<li><p>rate, r:</p>
+<p>  视频帧率</p>
+</li>
+<li><p>duration, d:</p>
+<p>  视频时长</p>
+</li>
+</ul>
+
+        <h2 id="生成纯色图像">
+          <a href="#生成纯色图像" class="heading-link"><i class="fas fa-link"></i></a><a href="#生成纯色图像" class="headerlink" title="生成纯色图像"></a>生成纯色图像</h2>
+      <p>生成纯色图片仅需要把上述生成视频的帧率和时长都设置为1即可。</p>
+<figure class="highlight plaintext"><div class="table-container"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ffmpeg -f lavfi -i color=s=1920x1080:r=1:c='#FF00FF':d=1 purple.jpg</span><br><span class="line"></span><br><span class="line"># or</span><br><span class="line">ffmpeg -f lavfi -i nullsrc=s=1280x720:r=1:d=1,lutrgb=255:0:255 purple.png</span><br></pre></td></tr></tbody></table></div></figure>
+
+<hr>
+<blockquote>
+<p>下面弄点好玩的</p>
+</blockquote>
+
+        <h2 id="正弦信号音频">
+          <a href="#正弦信号音频" class="heading-link"><i class="fas fa-link"></i></a><a href="#正弦信号音频" class="headerlink" title="正弦信号音频"></a>正弦信号音频</h2>
+      <p><code>aevalsrc</code>源可以产生特定参数的波形信号，前面<code>aevalsrc=0</code>产生静音信号，可以使用表达式来表示其信号波形。</p>
+<p><strong>生成48kHz采样率，频率为400Hz的长度10s的正弦信号单声道音频。</strong></p>
+<p><em>可以使用 Foobar2000 的 示波仪 看到正弦信号波形。</em></p>
+<figure class="highlight sh"><div class="table-container"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ffmpeg -f lavfi -i aevalsrc=<span class="string">"sin(400*2*PI*t):s=48000:d=10"</span> sin-400hz.mp3</span><br></pre></td></tr></tbody></table></div></figure>
+
+<p><strong>生成正弦+余弦 双声道信号</strong></p>
+<figure class="highlight sh"><div class="table-container"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ffmpeg -f lavfi -i aevalsrc=<span class="string">"sin(400*2*PI*t)|cos(420*2*PI*t):d=10"</span> sin-cos.mp3</span><br></pre></td></tr></tbody></table></div></figure>
+<p>长度可以使用<code>d=10</code> 或者 <code>-t 10</code>来指定。</p>
+
+        <h2 id="白噪声信号音频">
+          <a href="#白噪声信号音频" class="heading-link"><i class="fas fa-link"></i></a><a href="#白噪声信号音频" class="headerlink" title="白噪声信号音频"></a>白噪声信号音频</h2>
+      <p>可以使用<code>aevalsrc</code> 或者 <code>anoisesrc</code> 函数来产生白噪声信号。</p>
+
+        <h3 id="aevalsrc-1">
+          <a href="#aevalsrc-1" class="heading-link"><i class="fas fa-link"></i></a><a href="#aevalsrc-1" class="headerlink" title="aevalsrc"></a>aevalsrc</h3>
+      <p>使用随机数函数生成信号值</p>
+<figure class="highlight sh"><div class="table-container"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ffmpeg -f lavfi -i aevalsrc=<span class="string">"-2+random(0)"</span> -t 10 wn.mp3</span><br></pre></td></tr></tbody></table></div></figure>
+
+
+        <h3 id="anoisesrc">
+          <a href="#anoisesrc" class="heading-link"><i class="fas fa-link"></i></a><a href="#anoisesrc" class="headerlink" title="anoisesrc"></a>anoisesrc</h3>
+      <p>anoisesrc是专门用于产生噪声的源。</p>
+<figure class="highlight sh"><div class="table-container"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ffmpeg -f lavfi -i anoisesrc=c=white:c=white:r=44100:a=0.5:d=3 white.mp3</span><br></pre></td></tr></tbody></table></div></figure>
+<ul>
+<li><p>sample_rate, r</p>
+<p>  采样率</p>
+</li>
+<li><p>amplitude, a</p>
+<p>  声音幅值，0.0-1.0。</p>
+</li>
+<li><p>duration, d</p>
+<p>  时长</p>
+</li>
+<li><p>color, colour, c</p>
+<p>  噪声类型，white, pink, brown, blue, violet and velvet，默认白色。</p>
+</li>
+</ul>
+
+        <h2 id="文字转语音音频">
+          <a href="#文字转语音音频" class="heading-link"><i class="fas fa-link"></i></a><a href="#文字转语音音频" class="headerlink" title="文字转语音音频"></a>文字转语音音频</h2>
+      <p>这个功能需要集成<span class="exturl"><a class="exturl__link" target="_blank" rel="noopener" href="http://www.festvox.org/flite/">libflite</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span>库，编译时配置参数<code>--enable-libflite</code>。</p>
+<figure class="highlight sh"><div class="table-container"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 读文本</span></span><br><span class="line">ffmpeg -f lavfi -i flite=text=<span class="string">'How are you? I am fine. Thank you and you?'</span>:voice=slt -t 10 voice.mp3</span><br><span class="line"></span><br><span class="line"><span class="comment"># 读文件</span></span><br><span class="line">ffmpeg -f lavfi -i flite=textfile=speech.txt -t 10 voice.mp3</span><br></pre></td></tr></tbody></table></div></figure>
+
+<p>默认是男声，<code>voice=slt</code>是女声。</p>
+<p><code>ffplay -f lavfi -i flite=list_voices=1</code>可以列出所有支持的<code>voice</code>，例如：<code>kal, slt, rms</code>。</p>
+<p>测试发现不能识别中文，不知道是不是库版本原因。</p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="https://blog.lmshao.com">SHAO Liming</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="https://blog.lmshao.com/ffmpeg-cmd-generate-silent-audio-pure-color-video.html">https://blog.lmshao.com/ffmpeg-cmd-generate-silent-audio-pure-color-video.html</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="https://blog.lmshao.com/tags/ffmpeg/">ffmpeg</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/images/alipay.webp"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/images/wepay.webp"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-next"><a class="paginator-next__link" href="/how-to-build-ffmpeg.html"><span class="paginator-prev__text">Linux系统编译FFmpeg</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="gitalk-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%9F%E6%88%90%E9%9D%99%E9%9F%B3%E9%9F%B3%E9%A2%91"><span class="toc-number">1.</span> <span class="toc-text">
+          生成静音音频</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#anullsrc"><span class="toc-number">1.1.</span> <span class="toc-text">
+          anullsrc</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#aevalsrc"><span class="toc-number">1.2.</span> <span class="toc-text">
+          aevalsrc</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%9F%E6%88%90%E7%BA%AF%E8%89%B2%E8%A7%86%E9%A2%91"><span class="toc-number">2.</span> <span class="toc-text">
+          生成纯色视频</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#color"><span class="toc-number">2.1.</span> <span class="toc-text">
+          color</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#nullsrc"><span class="toc-number">2.2.</span> <span class="toc-text">
+          nullsrc</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%9F%E6%88%90%E7%BA%AF%E8%89%B2%E5%9B%BE%E5%83%8F"><span class="toc-number">3.</span> <span class="toc-text">
+          生成纯色图像</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%AD%A3%E5%BC%A6%E4%BF%A1%E5%8F%B7%E9%9F%B3%E9%A2%91"><span class="toc-number">4.</span> <span class="toc-text">
+          正弦信号音频</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%99%BD%E5%99%AA%E5%A3%B0%E4%BF%A1%E5%8F%B7%E9%9F%B3%E9%A2%91"><span class="toc-number">5.</span> <span class="toc-text">
+          白噪声信号音频</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#aevalsrc-1"><span class="toc-number">5.1.</span> <span class="toc-text">
+          aevalsrc</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#anoisesrc"><span class="toc-number">5.2.</span> <span class="toc-text">
+          anoisesrc</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%87%E5%AD%97%E8%BD%AC%E8%AF%AD%E9%9F%B3%E9%9F%B3%E9%A2%91"><span class="toc-number">6.</span> <span class="toc-text">
+          文字转语音音频</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/images/avatar.jpg" alt="avatar"></div><p class="sidebar-ov-author__text">Stay Hungry Stay Foolish</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lmshao" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://blog.csdn.net/shaosunrise" target="_blank" rel="noopener" data-popover="CSDN" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-cuttlefish"></i></span></a><a class="sidebar-ov-social-item" href="mailto:lmshao@163.com" target="_blank" rel="noopener" data-popover="Email" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="far fa-envelope"></i></span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">3</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">2</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">1</div><div class="sidebar-ov-state-item__name">标签</div></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span><span class="sidebar-reading-info__perc">%</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2021~2022</span><span class="footer__icon"><i class="fas fa-smile-wink"></i></span><span>SHAO Liming.  All Rights Reserved</span></div><div><span>Powered by <a href="http://hexo.io/" title="Hexo" target="_blank" rel="noopener">Hexo</a></span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/ribbon.js@latest/dist/ribbon.min.js" size="120" alpha="0.6" zIndex="-1"></script><script src="https://cdn.jsdelivr.net/npm/canvas-nest.js@1.0.1/dist/canvas-nest.min.js" color="255,0,0" opacity="0.7" count="99" zIndex="-1"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);
+
+function safeOpenUrl(url) {
+  var newTab = window.open();
+  newTab.opener = null;
+  newTab.location = url;
+}
+
+function extSearch(engine) {
+  var engines = {
+    google: 'https://www.google.com/search?q=',
+    bing: 'https://cn.bing.com/search?q=',
+    baidu: 'https://www.baidu.com/s?ie=UTF-8&wd=',
+  };
+  var host = window.location.host;
+  var query = $('.search-input input').val().toLowerCase().trim();
+  var uri = engines[engine] + query + ' site:' + host;
+
+  if (query) {
+    safeOpenUrl(uri);
+  } else {
+    Stun.utils.popAlert('warning', '请输入字符');
+  }
+}
+
+var assistSearchList = window.CONFIG.assistSearch;
+
+if (Array.isArray(assistSearchList)) {
+  assistSearchList.forEach(function (name) {
+    document.querySelector('.search-btns-item--' + name).addEventListener('click', function () {
+      extSearch(name);
+    }, false);
+  });
+}</script><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/gitalk@latest/dist/gitalk.min.js"></script><script src="https://cdn.jsdelivr.net/npm/js-md5@latest/src/md5.min.js"></script><script>function loadGitalk () {
+  if (!document.getElementById('gitalk-container')) {
+    return;
+  }
+
+  var gitalk = new Gitalk({
+    id: md5(window.location.pathname.slice(1)),
+    clientID: 'cbc4948c355e64c0c5f4',
+    clientSecret: '0e1e938252a4d1bfbb5b51a40757b497bcb37367',
+    repo: 'lmshao.github.io',
+    owner: 'lmshao',
+    admin: ['lmshao'],
+    distractionFreeMode: 'false',
+    language: 'zh-CN'
+  });
+  gitalk.render('gitalk-container');
+}
+
+if (false) {
+  loadGitalk();
+} else {
+  window.addEventListener('DOMContentLoaded', loadGitalk, false);
+}</script><script src="/js/utils.js?v=2.6.2"></script><script src="/js/stun-boot.js?v=2.6.2"></script><script src="/js/scroll.js?v=2.6.2"></script><script src="/js/header.js?v=2.6.2"></script><script src="/js/sidebar.js?v=2.6.2"></script><script type="application/json" src="/search.json"></script></body></html>
